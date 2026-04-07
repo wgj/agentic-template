@@ -36,6 +36,7 @@ The main ideas carried into this template are:
 - `PLANS.md` lives at the project root.
 - The supporting files under `docs/` are placeholders unless otherwise stated.
 - This pass avoids expanding into project-specific policy that is not directly supported by the sources above.
+- Some parts of this template can be adopted immediately, especially `PLANS.md` and repository-local specs. Other patterns, such as observability-driven legibility and mechanical architecture enforcement, only become useful once the target repository has something concrete to run, inspect, or enforce.
 
 ## Installing Into Another Project
 
