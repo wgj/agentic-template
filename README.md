@@ -127,3 +127,54 @@ The important pattern is:
 - make failures teach the agent how to recover
 
 Avoid turning the target repository into a giant style guide. Enforce invariants, not implementations. Leave local implementation freedom inside safe and documented boundaries.
+
+## Installing "Increasing Application Legibility" Into Another Project
+
+Use this pattern when the target repository wants Codex or another coding agent to inspect, reproduce, validate, and reason about the application directly instead of relying on human interpretation.
+
+The goal is not only readable code. The goal is to make the running application, its interfaces, and its operational signals legible to the agent while it works.
+
+Apply the pattern in this order:
+
+1. Inspect the target repository and identify the most important things the agent cannot currently see or exercise directly: UI behavior, logs, metrics, traces, startup health, background jobs, or key user journeys.
+2. Make the application bootable in an isolated per-task environment so an agent can run and test a change without interfering with other work.
+3. Expose the UI through tools the agent can drive directly, such as browser automation, DOM snapshots, screenshots, or navigation helpers.
+4. Expose runtime signals the agent can query directly, such as logs, metrics, traces, health endpoints, or task-specific debug output.
+5. Keep those observability surfaces local, ephemeral, and scoped to the task when practical so the agent can reason about its own change instead of shared noise.
+6. Add repository-local instructions and skills that explain how to boot the app, inspect it, and interpret the most important signals.
+7. Prefer repository-local, versioned artifacts over chat-only explanations. If a behavior, workflow, or operational expectation matters repeatedly, write it down in the repository.
+8. Favor dependencies, abstractions, and helper utilities that can be understood and modified in-repo over opaque behavior that the agent can only guess at.
+9. Turn important quality targets into observable checks the agent can validate directly, such as startup time, page rendering success, error-free flows, or latency thresholds.
+
+When doing this work in another repository, do not aim for maximum tooling first. Add the smallest set of legibility improvements that let the agent reproduce bugs, validate fixes, and understand the system's behavior without waiting on a human to interpret every result.
+
+Use wording like this in the target repository's docs:
+
+    Agent-operable runtime:
+    - The application must be bootable from a per-task environment.
+    - UI state must be inspectable through browser automation, DOM snapshots, or screenshots.
+    - Logs and health signals must be queryable locally while a task is running.
+    - Important user journeys must have explicit validation steps that an agent can execute directly.
+
+Use wording like this in the target repository's `AGENTS.md`:
+
+    Prefer workflows that let you inspect and validate the running application directly. If the repository provides agent-operable UI, logs, metrics, traces, screenshots, or runtime helpers, use them before relying on guesswork or chat-only context.
+
+When choosing what to make legible first, prefer high-leverage surfaces such as:
+
+- application startup and health checks
+- the primary UI flows or API calls involved in common bug reports
+- structured logs for the changed subsystem
+- metrics or traces for latency-sensitive paths
+- reference docs for local tools, third-party systems, or project-specific workflows the agent will need repeatedly
+
+The important pattern is:
+
+- make the app bootable per task
+- make the UI inspectable
+- make runtime signals queryable
+- keep important context in the repository
+- prefer systems the agent can understand end to end
+- let the agent validate outcomes directly instead of relying on human translation
+
+Avoid pushing essential operating knowledge into chat threads, dashboards the agent cannot access, or undocumented tribal memory. If the agent needs it repeatedly, make it discoverable in-repo or directly queryable from the runtime.
