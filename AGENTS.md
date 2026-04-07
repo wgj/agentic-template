@@ -96,6 +96,7 @@ In this repository, the main durable locations are:
 - Do not assume architecture that is not written down.
 - Prefer reading the repository over asking for routine context.
 - If important knowledge is missing, add it to the repository in the right place.
+- When a repeated architecture or quality preference becomes clear, prefer recording it as a repository-local invariant and, when appropriate, adding a mechanical check so future agents inherit it.
 
 ## Nested AGENTS
 
