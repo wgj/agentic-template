@@ -10,6 +10,7 @@ It is intentionally minimal. The goal of this pass is not to define a full engin
 - [GLOBAL_AGENTS.md](GLOBAL_AGENTS.md): a template for `~/.Codex/AGENTS.md`
 - [ARCHITECTURE.md](ARCHITECTURE.md): the top-level architecture map
 - [PLANS.md](PLANS.md): the root execution-plan standard
+- `.agents/skills/`: optional repo-local bootstrap workflows for Codex
 - `docs/`: source-of-truth folders and placeholders for durable repository knowledge
 
 ## What Inspired It
@@ -72,53 +73,7 @@ The agent should replace:
 
 Use this pattern when the target repository wants Codex or another coding agent to preserve architecture boundaries and quality expectations mechanically instead of learning them only through repeated review comments.
 
-Apply the pattern in this order:
-
-1. Inspect the target repository and identify the real architecture it should preserve: business domains, layers inside each domain, runtime boundaries, and cross-cutting interfaces.
-2. Write a short repository-local architecture document that defines those units in repository terms.
-3. Declare the allowed dependency directions explicitly.
-4. Treat the architecture as a closed world: once the allowed edges are listed, anything else is disallowed until the docs are updated.
-5. Require validation or parsing at important system boundaries without over-prescribing the exact library unless the repository already standardizes on one.
-6. Add mechanical enforcement immediately using a linter rule, dependency-boundary check, structural test, or CI script.
-7. Add a small set of high-value taste invariants that protect legibility and reliability, such as structured logging, naming rules, or file-size limits.
-8. Make every enforcement failure explain the violated invariant and the expected remediation so the next agent can recover quickly.
-9. Feed repeated review comments back into the repository as documentation updates, checks, or both.
-
-When doing this work in another repository, do not start by copying example boundaries from this template. Derive the actual rules from the target repository's real modules, layers, and runtime entrypoints.
-
-Use wording like this in the target repository's architecture docs:
-
-    Architecture units:
-    - Each business domain contains `types -> repo -> service -> runtime -> ui`.
-    - Cross-cutting concerns enter through `providers`.
-
-    Allowed dependency directions:
-    - `types -> repo`
-    - `repo -> service`
-    - `service -> runtime`
-    - `runtime -> ui`
-    - `providers -> runtime`
-
-    Any dependency edge not listed here is disallowed until the architecture docs and enforcement are updated together.
-
-Use wording like this for a boundary-validation invariant:
-
-    Data entering the system at network, storage, or third-party boundaries must be validated or parsed at the boundary before deeper layers depend on it.
-
-Use wording like this in the target repository's `AGENTS.md`:
-
-    If the repository defines allowed dependency directions, layering rules, domain boundaries, or boundary-validation requirements, treat all other approaches as disallowed. Do not introduce a new dependency edge or bypass a declared boundary invariant unless the repository docs and enforcement are updated together.
-
-When choosing what to enforce, prefer small, high-value invariants such as:
-
-- forbidden layer crossings
-- domain boundary violations
-- required validation at system boundaries
-- naming or file-layout rules that protect navigation and readability
-- structured logging requirements
-- file-size or complexity limits in areas that agents repeatedly overgrow
-
-The important pattern is:
+Core pattern:
 
 - define the architecture in repository terms
 - list the allowed edges explicitly
@@ -127,49 +82,22 @@ The important pattern is:
 - encode a small set of taste invariants
 - make failures teach the agent how to recover
 
-Avoid turning the target repository into a giant style guide. Enforce invariants, not implementations. Leave local implementation freedom inside safe and documented boundaries.
+Use the repo-local skill [`bootstrap-architecture-enforcement`](./.agents/skills/bootstrap-architecture-enforcement/SKILL.md) to apply this workflow in a target repository.
+
+That skill is responsible for:
+
+- extracting real domains, layers, and boundaries from the target repository
+- drafting the repository-local docs and `AGENTS.md` rule
+- scaffolding or adding the first credible enforcement path
+- leaving explicit next steps if the repository is not mature enough for full enforcement yet
+
+The lasting source of truth should still end up in the target repository's own docs, checks, and CI rather than living only in the skill.
 
 ## Installing "Increasing Application Legibility" Into Another Project
 
 Use this pattern when the target repository wants Codex or another coding agent to inspect, reproduce, validate, and reason about the application directly instead of relying on human interpretation.
 
-The goal is not only readable code. The goal is to make the running application, its interfaces, and its operational signals legible to the agent while it works.
-
-Apply the pattern in this order:
-
-1. Inspect the target repository and identify the most important things the agent cannot currently see or exercise directly: UI behavior, logs, metrics, traces, startup health, background jobs, or key user journeys.
-2. Make the application bootable in an isolated per-task environment so an agent can run and test a change without interfering with other work.
-3. Expose the UI through tools the agent can drive directly, such as browser automation, DOM snapshots, screenshots, or navigation helpers.
-4. Expose runtime signals the agent can query directly, such as logs, metrics, traces, health endpoints, or task-specific debug output.
-5. Keep those observability surfaces local, ephemeral, and scoped to the task when practical so the agent can reason about its own change instead of shared noise.
-6. Add repository-local instructions and skills that explain how to boot the app, inspect it, and interpret the most important signals.
-7. Prefer repository-local, versioned artifacts over chat-only explanations. If a behavior, workflow, or operational expectation matters repeatedly, write it down in the repository.
-8. Favor dependencies, abstractions, and helper utilities that can be understood and modified in-repo over opaque behavior that the agent can only guess at.
-9. Turn important quality targets into observable checks the agent can validate directly, such as startup time, page rendering success, error-free flows, or latency thresholds.
-
-When doing this work in another repository, do not aim for maximum tooling first. Add the smallest set of legibility improvements that let the agent reproduce bugs, validate fixes, and understand the system's behavior without waiting on a human to interpret every result.
-
-Use wording like this in the target repository's docs:
-
-    Agent-operable runtime:
-    - The application must be bootable from a per-task environment.
-    - UI state must be inspectable through browser automation, DOM snapshots, or screenshots.
-    - Logs and health signals must be queryable locally while a task is running.
-    - Important user journeys must have explicit validation steps that an agent can execute directly.
-
-Use wording like this in the target repository's `AGENTS.md`:
-
-    Prefer workflows that let you inspect and validate the running application directly. If the repository provides agent-operable UI, logs, metrics, traces, screenshots, or runtime helpers, use them before relying on guesswork or chat-only context.
-
-When choosing what to make legible first, prefer high-leverage surfaces such as:
-
-- application startup and health checks
-- the primary UI flows or API calls involved in common bug reports
-- structured logs for the changed subsystem
-- metrics or traces for latency-sensitive paths
-- reference docs for local tools, third-party systems, or project-specific workflows the agent will need repeatedly
-
-The important pattern is:
+Core pattern:
 
 - make the app bootable per task
 - make the UI inspectable
@@ -178,4 +106,13 @@ The important pattern is:
 - prefer systems the agent can understand end to end
 - let the agent validate outcomes directly instead of relying on human translation
 
-Avoid pushing essential operating knowledge into chat threads, dashboards the agent cannot access, or undocumented tribal memory. If the agent needs it repeatedly, make it discoverable in-repo or directly queryable from the runtime.
+Use the repo-local skill [`bootstrap-application-legibility`](./.agents/skills/bootstrap-application-legibility/SKILL.md) to apply this workflow in a target repository.
+
+That skill is responsible for:
+
+- identifying the highest-leverage missing observability and validation surfaces
+- documenting how the target app should be booted, inspected, and validated
+- adding or scaffolding the first credible runtime hooks the repository can support
+- leaving explicit next steps when the project is still too early-stage for full agent-operable observability
+
+The lasting source of truth should still end up in the target repository's docs, local workflows, and observable runtime surfaces rather than living only in the skill.
