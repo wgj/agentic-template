@@ -116,3 +116,71 @@ That skill is responsible for:
 - leaving explicit next steps when the project is still too early-stage for full agent-operable observability
 
 The lasting source of truth should still end up in the target repository's docs, local workflows, and observable runtime surfaces rather than living only in the skill.
+
+## Installing "Knowledge-Base Enforcement" Into Another Project
+
+Use this pattern when the target repository wants Codex or another coding agent to rely on durable, discoverable repository knowledge instead of chat-only explanations or tribal memory.
+
+Core pattern:
+
+- keep entrypoint docs short and navigational
+- make source-of-truth docs easy to discover
+- keep indexes current
+- promote repeated explanations into repository artifacts
+- add lightweight maintenance or drift checks where practical
+
+Use the repo-local skill [`bootstrap-knowledge-base-enforcement`](./.agents/skills/bootstrap-knowledge-base-enforcement/SKILL.md) to apply this workflow in a target repository.
+
+That skill is responsible for:
+
+- identifying the repository's real knowledge entrypoints
+- improving source-of-truth routing and index coverage
+- scaffolding checks or maintenance points for doc drift
+- leaving explicit next steps where the knowledge base is still incomplete
+
+The lasting source of truth should still end up in the target repository's own docs and generated artifacts rather than living only in the skill.
+
+## Installing "Documentation Gardening" Into Another Project
+
+Use this pattern when the target repository already has docs, but they drift over time and become harder for fresh-context agents to trust.
+
+Core pattern:
+
+- repair stale indexes and cross-links
+- keep placeholders honest
+- promote repeated chat explanations into docs
+- leave the repository easier to navigate after each pass
+
+Use the repo-local skill [`doc-gardener`](./.agents/skills/doc-gardener/SKILL.md) to apply this workflow in a target repository.
+
+That skill is responsible for:
+
+- finding stale routing and missing cross-links
+- updating indexes and entrypoint docs
+- filling in durable gaps when enough context exists
+- making remaining gaps explicit when they cannot be resolved yet
+
+The lasting source of truth should still end up in the target repository's own docs and indexes rather than living only in the skill.
+
+## Installing "Generated Reference Artifacts" Into Another Project
+
+Use this pattern when the target repository needs concise, mechanically derived reference artifacts that agents can consult without rediscovering the same facts repeatedly.
+
+Core pattern:
+
+- identify facts the agent repeatedly needs
+- derive them mechanically when possible
+- store them in a generated-docs area
+- document how they are refreshed
+- link them from the nearest useful index
+
+Use the repo-local skill [`generate-reference-artifacts`](./.agents/skills/generate-reference-artifacts/SKILL.md) to apply this workflow in a target repository.
+
+That skill is responsible for:
+
+- identifying high-value generated reference artifacts
+- producing the first useful artifact set
+- documenting regeneration steps
+- linking those artifacts into the repository knowledge base
+
+The lasting source of truth should still end up in the target repository's generated artifacts and index docs rather than living only in the skill.
